@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Local Flashcards
 
-## Getting Started
+Minimal, offline-friendly flashcards that run locally. Decks are authored in Markdown, rendered with code blocks, and studied with tap-to-flip + swipe left/right.
 
-First, run the development server:
+- Swipe right = Know (removes from queue)
+- Swipe left = Don't know (requeues later)
+- Tap = Flip front/back
+- Works great for code-heavy decks (GitHub-flavoured Markdown)
+
+## Quick Start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Importing Decks (Markdown)
+You can load decks three ways from the Home screen:
+- Download sample Markdown (header link)
+- Import Markdown (File)
+- Paste Markdown
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Deck Format
+Use a title, optional description, then repeat sections for each card.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+````markdown
+# My Deck
 
-## Learn More
+Optional description...
 
-To learn more about Next.js, take a look at the following resources:
+## Front
+What is string interpolation?
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Back
+```csharp
+var message = $"Hello {name}";
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Hint
+It works with any expression.
+````
 
-## Deploy on Vercel
+Notes
+- Use GitHub-flavoured Markdown (headings, lists, tables, fenced code blocks).
+- Large code blocks scroll within the card.
+- Language hints in fences (```csharp, ```js, etc.) are supported for styling.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Study Controls
+- Gesture: drag horizontally to grade, release to commit
+- Tap: flip card (front/back)
+- On-screen helper: "Tap to flip Drag left/right"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Data & Privacy
+- All data is stored in your browser's localStorage.
+- Use "Reset progress" per deck to clear learned state.
+
+## Tech Stack
+- Next.js (App Router) + React + TypeScript
+- framer-motion (drag/physics), react-markdown (+ remark-gfm/remark-breaks)
+- Zustand (state), Tailwind CSS
+
+## Scripts
+- Dev: `npm run dev`
+- Build: `npm run build`
+- Start: `npm run start`
+- Lint: `npm run lint`
+
+## Sample Deck
+A ready-to-use example lives at `public/sample-deck.md` and is linked from the Home page.
+
+

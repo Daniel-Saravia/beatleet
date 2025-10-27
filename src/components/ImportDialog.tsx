@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import type { ImportSetJson } from "@/lib/types";
+import { parseMarkdownDeck, isLikelyJsonDeck } from "@/lib/parseMarkdownDeck";
 
 export function ImportDialog() {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -16,8 +17,10 @@ export function ImportDialog() {
     setBusy(true);
     try {
       const text = await file.text();
-      const json = JSON.parse(text) as ImportSetJson;
-      const id = importSetJson(json);
+      const deck: ImportSetJson = (file.name.toLowerCase().endsWith(".md") || file.type.includes("markdown") || !isLikelyJsonDeck(text))
+        ? parseMarkdownDeck(text)
+        : (JSON.parse(text) as ImportSetJson);
+      const id = importSetJson(deck);
       alert(`Imported set: ${id}`);
     } catch (err: any) {
       alert(`Import failed: ${err?.message || String(err)}`);
@@ -32,7 +35,7 @@ export function ImportDialog() {
       <input
         ref={inputRef}
         type="file"
-        accept="application/json"
+        accept=".md,text/markdown,application/markdown,application/json"
         className="hidden"
         onChange={onPick}
       />
@@ -40,11 +43,16 @@ export function ImportDialog() {
         onClick={openPicker}
         disabled={busy}
         className="rounded-full bg-zinc-900 px-4 py-2 text-white shadow hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-black dark:hover:bg-zinc-200"
-        title="Import JSON Set"
+        title="Import Markdown Deck"
       >
-        {busy ? "Importing…" : "Import JSON"}
+        {busy ? "Importing..." : "Import Markdown"}
       </button>
     </div>
   );
 }
+
+
+
+
+
 

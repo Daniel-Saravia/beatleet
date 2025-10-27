@@ -10,14 +10,14 @@ export default function Home() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl p-6 sm:p-10">
-      <header className="mb-8 flex items-center justify-between">
+      <header className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold">Local Flashcards</h1>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
           <a
-            href="/sample-deck.json"
-            className="rounded-full border border-zinc-300 px-4 py-2 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+            href="/sample-deck.md"
+            className="w-full rounded-full border border-zinc-300 px-4 py-2 text-center text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900 sm:w-auto"
           >
-            Download sample JSON
+            Download sample Markdown
           </a>
           <ImportDialog />
         </div>
@@ -25,7 +25,7 @@ export default function Home() {
 
       {sets.allIds.length === 0 ? (
         <div className="rounded-xl border border-dashed border-zinc-300 p-10 text-center text-zinc-500 dark:border-zinc-700">
-          No sets yet. Import a JSON deck to get started.
+          No sets yet. Import a Markdown deck to get started.
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -56,3 +56,4 @@ export default function Home() {
     </main>
   );
 }
+

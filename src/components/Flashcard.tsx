@@ -1,6 +1,11 @@
 "use client";
-import { motion, useMotionValue, useTransform } from "framer-motion";
-import { useState } from "react";
+import { motion, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
+import type { Components } from "react-markdown";
+import { useSwipeCard } from "@/lib/useSwipeCard";
 
 type Props = {
   front: string;
@@ -8,33 +13,192 @@ type Props = {
   onResult: (res: "know" | "dont") => void;
 };
 
+const markdownComponents: Components = {
+  p({ children }) {
+    return <p className="mb-4 text-left text-lg leading-relaxed last:mb-0">{children}</p>;
+  },
+  ul({ children }) {
+    return (
+      <ul className="mb-4 list-disc space-y-2 pl-6 text-left last:mb-0">{children}</ul>
+    );
+  },
+  ol({ children }) {
+    return (
+      <ol className="mb-4 list-decimal space-y-2 pl-6 text-left last:mb-0">{children}</ol>
+    );
+  },
+  li({ children }) {
+    return <li className="text-left text-lg leading-relaxed">{children}</li>;
+  },
+  blockquote({ children }) {
+    return (
+      <blockquote className="mb-4 border-l-4 border-zinc-300 pl-4 italic text-zinc-600 last:mb-0 dark:border-zinc-600 dark:text-zinc-300">
+        {children}
+      </blockquote>
+    );
+  },
+  code({ inline, className, children, node: _node, ...props }) {
+    const content = String(children).replace(/\n$/, "");
+    if (inline) {
+      const classes = [
+        "rounded bg-zinc-950/10 px-1.5 py-0.5 font-mono text-base",
+        "dark:bg-zinc-100/10",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ");
+      return (
+        <code
+          {...props}
+          className={classes}
+        >
+          {content}
+        </code>
+      );
+    }
+    const language = className?.replace("language-", "") || "";
+    return (
+      <pre
+        className="mb-4 max-h-[45vh] w-full overflow-auto rounded-xl bg-zinc-900 p-4 text-left text-sm text-zinc-100 shadow-inner last:mb-0 dark:bg-zinc-800"
+        data-language={language}
+      >
+        {language && (
+          <div className="mb-3 text-xs uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+            {language}
+          </div>
+        )}
+        <code {...props} className={`block font-mono leading-6 ${className || ""}`}>
+          {content}
+        </code>
+      </pre>
+    );
+  },
+  a({ children, node: _node, ...props }) {
+    return (
+      <a
+        {...props}
+        className="text-blue-600 underline decoration-2 underline-offset-2 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+        target="_blank"
+        rel="noreferrer"
+      >
+        {children}
+      </a>
+    );
+  },
+  strong({ children }) {
+    return <strong className="font-semibold text-zinc-900 dark:text-zinc-100">{children}</strong>;
+  },
+  em({ children }) {
+    return <em className="text-zinc-700 dark:text-zinc-200">{children}</em>;
+  },
+  h1({ children }) {
+    return (
+      <h1 className="mb-4 text-left text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
+        {children}
+      </h1>
+    );
+  },
+  h2({ children }) {
+    return (
+      <h2 className="mb-4 text-left text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+        {children}
+      </h2>
+    );
+  },
+  h3({ children }) {
+    return (
+      <h3 className="mb-4 text-left text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+        {children}
+      </h3>
+    );
+  },
+};
+
+const markdownRemarkPlugins = [remarkGfm, remarkBreaks];
+
 export function Flashcard({ front, back, onResult }: Props) {
   const [flipped, setFlipped] = useState(false);
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 0, 200], [-8, 0, 8]);
-  const bg = useTransform(x, [-150, 0, 150], ["#ef4444", "#ffffff", "#10b981"]);
+  const didDragRef = useRef(false);
+  const { x, rotate, handlers } = useSwipeCard({
+    onResult,
+    onDragChange: (active) => {
+      if (!active) {
+        didDragRef.current = false;
+      }
+    },
+    onDragMove: (distance) => {
+      if (Math.abs(distance) > 8) {
+        didDragRef.current = true;
+      }
+    },
+  });
+  const tint = useTransform(
+    x,
+    [-200, 0, 200],
+    ["rgba(248,113,113,0.35)", "rgba(255,255,255,0)", "rgba(34,197,94,0.35)"],
+  );
 
-  const onEnd = () => {
-    const current = x.get();
-    if (current > 120) onResult("know");
-    else if (current < -120) onResult("dont");
-  };
+  useEffect(() => {
+    setFlipped(false);
+    didDragRef.current = false;
+  }, [front, back]);
 
   return (
     <motion.div
-      onTap={() => setFlipped((f) => !f)}
-      drag="x"
-      style={{ x, rotate, background: bg as any }}
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.2}
-      onDragEnd={onEnd}
-      className="mx-auto w-full max-w-xl cursor-pointer select-none rounded-2xl border border-zinc-200 p-8 text-center shadow dark:border-zinc-800 dark:bg-zinc-900"
+      {...handlers}
+      onTap={() => {
+        if (didDragRef.current) return;
+        setFlipped((f) => !f);
+      }}
+      // touchAction 'pan-y' tells the browser vertical swipes scroll the page,
+      // leaving horizontal swipes to JS so the swipe handler can track them.
+      style={{ touchAction: "pan-y" as any, x, rotate, perspective: 1000 }}
+      className="mx-auto flex h-[70vh] w-full max-w-xl cursor-pointer select-none items-stretch justify-stretch text-center touch-pan-y"
     >
-      <div className="text-zinc-500 text-xs mb-2">Tap to flip • Drag left/right</div>
-      <div className="text-2xl font-semibold whitespace-pre-wrap">
-        {flipped ? back : front}
-      </div>
+      <motion.div
+        className="relative h-full w-full rounded-2xl border border-zinc-200 bg-zinc-100 shadow dark:border-zinc-800 dark:bg-zinc-900"
+        style={{ transformStyle: "preserve-3d" as any }}
+        animate={{ rotateY: flipped ? 180 : 0 }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
+      >
+        {/* Front face */}
+        <motion.div
+          className="absolute inset-0 flex flex-col rounded-2xl p-6 touch-pan-y"
+          style={{ backfaceVisibility: "hidden", backgroundColor: tint } as any}
+        >
+          <div className="mb-2 text-xs text-zinc-500">Tap to flip • Drag left/right</div>
+          <div className="flex-1 overflow-auto text-left touch-pan-y">
+            <ReactMarkdown
+              remarkPlugins={markdownRemarkPlugins}
+              components={markdownComponents}
+              className="pb-4 text-left text-lg leading-relaxed"
+            >
+              {front}
+            </ReactMarkdown>
+          </div>
+        </motion.div>
+
+        {/* Back face */}
+        <motion.div
+          className="absolute inset-0 flex flex-col rounded-2xl p-6 touch-pan-y"
+          style={{
+            transform: "rotateY(180deg)",
+            backfaceVisibility: "hidden",
+            backgroundColor: tint,
+          } as any}
+        >
+          <div className="mb-2 text-xs text-zinc-500">Tap to flip • Drag left/right</div>
+          <div className="flex-1 overflow-auto text-left touch-pan-y">
+            <ReactMarkdown
+              remarkPlugins={markdownRemarkPlugins}
+              components={markdownComponents}
+              className="pb-4 text-left text-lg leading-relaxed"
+            >
+              {back}
+            </ReactMarkdown>
+          </div>
+        </motion.div>
+      </motion.div>
     </motion.div>
   );
 }
-
