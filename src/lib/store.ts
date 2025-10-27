@@ -61,7 +61,7 @@ export const useAppStore = create<AppState>()(
         }),
       importSetJson: (input) => {
         if (!input.title || !Array.isArray(input.cards) || input.cards.length === 0) {
-          throw new Error("Invalid JSON: title and at least one card required");
+          throw new Error("Invalid deck: title and at least one card required");
         }
         const id = input.id || uuidv4();
         const setDoc: SetDoc = {
@@ -86,4 +86,5 @@ export const useAppStore = create<AppState>()(
     }
   )
 );
+
 

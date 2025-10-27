@@ -1,10 +1,9 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { startQueue, grade } from "@/lib/queue";
 import { Flashcard } from "@/components/Flashcard";
-import { StudyControls } from "@/components/StudyControls";
 import { ProgressBar } from "@/components/ProgressBar";
 
 export default function StudyPage() {
@@ -20,16 +19,7 @@ export default function StudyPage() {
   const [queue, setQueue] = useState(initialQueue);
   const [index, setIndex] = useState(0);
 
-  if (!setDoc) {
-    return (
-      <main className="mx-auto min-h-screen w-full max-w-3xl p-6">
-        <button className="underline" onClick={() => router.push("/")}>← Back</button>
-        <div className="mt-6 text-zinc-500">Set not found.</div>
-      </main>
-    );
-  }
-
-  const total = setDoc.cards.length;
+  const total = setDoc?.cards.length ?? 0;
   const learnedCount = Object.values(learnedMap).filter(Boolean).length;
   const percent = total === 0 ? 0 : (learnedCount / total) * 100;
 
@@ -50,6 +40,16 @@ export default function StudyPage() {
     setIndex(0);
   };
 
+  // Keyboard controls (Left = don't know, Right = know)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") onDont();
+      if (e.key === "ArrowRight") onKnow();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onKnow, onDont, current]);
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-3xl p-6">
       <div className="mb-4 flex items-center justify-between">
@@ -60,13 +60,12 @@ export default function StudyPage() {
       </div>
       <ProgressBar percent={percent} />
 
-      <h1 className="mt-6 text-xl font-semibold">{setDoc.title}</h1>
-      {setDoc.description ? (
-        <div className="text-sm text-zinc-500">{setDoc.description}</div>
-      ) : null}
-
       <div className="mt-8">
-        {done ? (
+        {!setDoc ? (
+          <div className="rounded-xl border border-zinc-200 p-8 text-center text-zinc-500 shadow-sm dark:border-zinc-800">
+            Set not found.
+          </div>
+        ) : done ? (
           <div className="rounded-xl border border-zinc-200 p-8 text-center shadow-sm dark:border-zinc-800">
             <div className="text-2xl font-semibold">All learned 🎉</div>
             <div className="mt-2 text-zinc-500">You have completed this set.</div>
@@ -74,7 +73,9 @@ export default function StudyPage() {
         ) : (
           <>
             <Flashcard front={current.front} back={current.back} onResult={(r) => (r === "know" ? onKnow() : onDont())} />
-            <StudyControls onKnow={onKnow} onDont={onDont} />
+            <p className="mx-auto mt-3 max-w-xl text-center text-xs text-zinc-500">
+              Tip: Use Left/Right arrow keys or swipe to grade.
+            </p>
           </>
         )}
       </div>
