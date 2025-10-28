@@ -24,3 +24,81 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+code,
+pre {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+}
+
+:root {
+  --code-foreground: #18181b;
+  --code-token-keyword: #0f766e;
+  --code-token-string: #b91c1c;
+  --code-token-number: #7c3aed;
+  --code-token-comment: #71717a;
+  --code-token-function: #1d4ed8;
+  --code-token-operator: #2563eb;
+  --code-token-punctuation: #3f3f46;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --code-foreground: #e4e4e7;
+    --code-token-keyword: #34d399;
+    --code-token-string: #f9a8d4;
+    --code-token-number: #c4b5fd;
+    --code-token-comment: #a1a1aa;
+    --code-token-function: #93c5fd;
+    --code-token-operator: #60a5fa;
+    --code-token-punctuation: #d4d4d8;
+  }
+}
+
+.fc-code-block pre.hljs {
+  background: transparent;
+  color: var(--code-foreground);
+}
+
+.fc-code-block code .hljs-comment,
+.fc-code-block code .hljs-quote {
+  color: var(--code-token-comment);
+  font-style: italic;
+}
+
+.fc-code-block code .hljs-keyword,
+.fc-code-block code .hljs-selector-tag,
+.fc-code-block code .hljs-literal {
+  color: var(--code-token-keyword);
+}
+
+.fc-code-block code .hljs-string,
+.fc-code-block code .hljs-doctag {
+  color: var(--code-token-string);
+}
+
+.fc-code-block code .hljs-number,
+.fc-code-block code .hljs-regexp,
+.fc-code-block code .hljs-variable,
+.fc-code-block code .hljs-template-variable {
+  color: var(--code-token-number);
+}
+
+.fc-code-block code .hljs-title,
+.fc-code-block code .hljs-function,
+.fc-code-block code .hljs-type {
+  color: var(--code-token-function);
+}
+
+.fc-code-block code .hljs-attr,
+.fc-code-block code .hljs-attribute,
+.fc-code-block code .hljs-built_in,
+.fc-code-block code .hljs-selector-attr,
+.fc-code-block code .hljs-selector-class {
+  color: var(--code-token-operator);
+}
+
+.fc-code-block code .hljs-punctuation,
+.fc-code-block code .hljs-symbol,
+.fc-code-block code .hljs-meta {
+  color: var(--code-token-punctuation);
+}

@@ -1,11 +1,12 @@
 "use client";
-import { motion, useTransform } from "framer-motion";
+import { motion, useTransform, type MotionStyle } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import type { Components } from "react-markdown";
 import { useSwipeCard } from "@/lib/useSwipeCard";
+import { CodeBlock } from "./CodeBlock";
 
 type Props = {
   front: string;
@@ -37,12 +38,12 @@ const markdownComponents: Components = {
       </blockquote>
     );
   },
-  code({ inline, className, children, node: _node, ...props }) {
+  code({ inline, className, children, ...props }) {
     const content = String(children).replace(/\n$/, "");
     if (inline) {
       const classes = [
-        "rounded bg-zinc-950/10 px-1.5 py-0.5 font-mono text-base",
-        "dark:bg-zinc-100/10",
+        "rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-base text-zinc-900",
+        "dark:bg-zinc-700/40 dark:text-zinc-100",
         className,
       ]
         .filter(Boolean)
@@ -56,24 +57,10 @@ const markdownComponents: Components = {
         </code>
       );
     }
-    const language = className?.replace("language-", "") || "";
-    return (
-      <pre
-        className="mb-4 max-h-[45vh] w-full overflow-auto rounded-xl bg-zinc-900 p-4 text-left text-sm text-zinc-100 shadow-inner last:mb-0 dark:bg-zinc-800"
-        data-language={language}
-      >
-        {language && (
-          <div className="mb-3 text-xs uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-            {language}
-          </div>
-        )}
-        <code {...props} className={`block font-mono leading-6 ${className || ""}`}>
-          {content}
-        </code>
-      </pre>
-    );
+    const language = className?.replace("language-", "") || undefined;
+    return <CodeBlock code={content} language={language} />;
   },
-  a({ children, node: _node, ...props }) {
+  a({ children, ...props }) {
     return (
       <a
         {...props}
@@ -138,6 +125,15 @@ export function Flashcard({ front, back, onResult }: Props) {
     ["rgba(248,113,113,0.35)", "rgba(255,255,255,0)", "rgba(34,197,94,0.35)"],
   );
 
+  const cardMotionStyle: MotionStyle = { x, rotate, perspective: 1000 };
+  const cardInnerStyle: MotionStyle = { transformStyle: "preserve-3d" };
+  const frontFaceStyle: MotionStyle = { backfaceVisibility: "hidden", backgroundColor: tint };
+  const backFaceStyle: MotionStyle = {
+    transform: "rotateY(180deg)",
+    backfaceVisibility: "hidden",
+    backgroundColor: tint,
+  };
+
   useEffect(() => {
     setFlipped(false);
     didDragRef.current = false;
@@ -150,23 +146,22 @@ export function Flashcard({ front, back, onResult }: Props) {
         if (didDragRef.current) return;
         setFlipped((f) => !f);
       }}
-      // touchAction 'pan-y' tells the browser vertical swipes scroll the page,
-      // leaving horizontal swipes to JS so the swipe handler can track them.
-      style={{ touchAction: "pan-y" as any, x, rotate, perspective: 1000 }}
+      // touchAction pan-y is applied via the utility class so swipe handlers stay responsive.
+      style={cardMotionStyle}
       className="mx-auto flex h-[70vh] w-full max-w-xl cursor-pointer select-none items-stretch justify-stretch text-center touch-pan-y"
     >
       <motion.div
         className="relative h-full w-full rounded-2xl border border-zinc-200 bg-zinc-100 shadow dark:border-zinc-800 dark:bg-zinc-900"
-        style={{ transformStyle: "preserve-3d" as any }}
+        style={cardInnerStyle}
         animate={{ rotateY: flipped ? 180 : 0 }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
       >
         {/* Front face */}
         <motion.div
           className="absolute inset-0 flex flex-col rounded-2xl p-6 touch-pan-y"
-          style={{ backfaceVisibility: "hidden", backgroundColor: tint } as any}
+          style={frontFaceStyle}
         >
-          <div className="mb-2 text-xs text-zinc-500">Tap to flip • Drag left/right</div>
+          <div className="mb-2 text-xs text-zinc-500">Tap to flip | Drag left/right</div>
           <div className="flex-1 overflow-auto text-left touch-pan-y">
             <ReactMarkdown
               remarkPlugins={markdownRemarkPlugins}
@@ -181,13 +176,9 @@ export function Flashcard({ front, back, onResult }: Props) {
         {/* Back face */}
         <motion.div
           className="absolute inset-0 flex flex-col rounded-2xl p-6 touch-pan-y"
-          style={{
-            transform: "rotateY(180deg)",
-            backfaceVisibility: "hidden",
-            backgroundColor: tint,
-          } as any}
+          style={backFaceStyle}
         >
-          <div className="mb-2 text-xs text-zinc-500">Tap to flip • Drag left/right</div>
+          <div className="mb-2 text-xs text-zinc-500">Tap to flip | Drag left/right</div>
           <div className="flex-1 overflow-auto text-left touch-pan-y">
             <ReactMarkdown
               remarkPlugins={markdownRemarkPlugins}

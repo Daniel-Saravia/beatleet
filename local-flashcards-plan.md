@@ -219,8 +219,18 @@ http://localhost:3000
 
 ---
 
+## 13) Code Block Formatting Requirements
+- Preserve author indentation while optionally allowing soft-wrap toggling per block.
+- Show the detected language label when available; default to "Code" otherwise.
+- Provide a one-tap copy-to-clipboard action with visible success feedback.
+- Keep blocks within card bounds via max-height + smooth horizontal scrolling.
+- Align colors and contrast with light and dark themes, including controls.
+- Maintain inline code styling distinct yet unobtrusive within body copy.
+
+---
 ### Sample public/sample-deck.md
 `markdown\n\#\ Spanish\ A1\ -\ Basics\n\nGreetings\ &\ essentials\n\n\#\#\ Front\nHola\n\n\#\#\ Back\nHello\n\n---\n\n\#\#\ Front\nGracias\n\n\#\#\ Back\nThank\ you\n``n
+
 
 
 
