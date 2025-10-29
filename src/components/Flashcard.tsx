@@ -1,6 +1,6 @@
 "use client";
 import { motion, useTransform, type MotionStyle } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { isValidElement, useRef, useState, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
@@ -14,8 +14,28 @@ type Props = {
   onResult: (res: "know" | "dont") => void;
 };
 
+function isCodeBlockElement(node: ReactNode): boolean {
+  if (!isValidElement(node)) return false;
+  if ((node.props as { ["data-code-block"]?: string | boolean })?.["data-code-block"]) return true;
+  const { type } = node;
+  return type === CodeBlock;
+}
+
 const markdownComponents: Components = {
   p({ children }) {
+    const childArray = Array.isArray(children) ? children : [children];
+    const meaningfulChildren = childArray.filter((child) => {
+      if (typeof child === "string") {
+        return child.trim().length > 0;
+      }
+      return child !== null && child !== undefined;
+    });
+    const onlyCodeBlock = meaningfulChildren.length === 1 && isCodeBlockElement(meaningfulChildren[0]);
+
+    if (onlyCodeBlock) {
+      return <>{meaningfulChildren[0]}</>;
+    }
+
     return <p className="mb-4 text-left text-lg leading-relaxed last:mb-0">{children}</p>;
   },
   ul({ children }) {
@@ -133,11 +153,6 @@ export function Flashcard({ front, back, onResult }: Props) {
     backfaceVisibility: "hidden",
     backgroundColor: tint,
   };
-
-  useEffect(() => {
-    setFlipped(false);
-    didDragRef.current = false;
-  }, [front, back]);
 
   return (
     <motion.div

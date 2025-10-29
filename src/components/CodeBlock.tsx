@@ -115,7 +115,10 @@ function CodeBlockComponent({ code, language }: CodeBlockProps) {
   };
 
   return (
-    <div className="fc-code-block mb-4 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-inner last:mb-0 dark:border-zinc-800 dark:bg-zinc-900/60">
+    <div
+      className="fc-code-block mb-4 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-inner last:mb-0 dark:border-zinc-800 dark:bg-zinc-900/60"
+      data-code-block="true"
+    >
       <div className="fc-code-block__header flex items-center justify-between border-b border-zinc-200 px-3 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
         <span>{headerLabel}</span>
         <div className="flex items-center gap-2">
