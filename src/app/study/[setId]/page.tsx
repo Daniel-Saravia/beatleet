@@ -72,7 +72,12 @@ export default function StudyPage() {
           </div>
         ) : (
           <>
-            <Flashcard front={current.front} back={current.back} onResult={(r) => (r === "know" ? onKnow() : onDont())} />
+            <Flashcard
+              key={current.id}
+              front={current.front}
+              back={current.back}
+              onResult={(r) => (r === "know" ? onKnow() : onDont())}
+            />
             <p className="mx-auto mt-3 max-w-xl text-center text-xs text-zinc-500">
               Tip: Use Left/Right arrow keys or swipe to grade.
             </p>
